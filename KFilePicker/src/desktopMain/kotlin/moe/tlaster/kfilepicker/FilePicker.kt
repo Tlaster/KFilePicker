@@ -53,6 +53,29 @@ actual object FilePicker {
             }
         }
     }
+
+    actual suspend fun createFile(name: String): PlatformFile? {
+        if (System.getProperty("os.name").contains("nux")) {
+            val chooser = JFileChooser().apply {
+                dialogType = JFileChooser.SAVE_DIALOG
+            }
+            return if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
+                PlatformFile(chooser.selectedFile)
+            } else {
+                null
+            }
+        } else {
+            val dialog = FileDialog(frame).apply {
+                mode = FileDialog.SAVE
+            }
+            dialog.isVisible = true
+            return dialog.files.map {
+                PlatformFile(
+                    file = it
+                )
+            }.firstOrNull()
+        }
+    }
 }
 
 

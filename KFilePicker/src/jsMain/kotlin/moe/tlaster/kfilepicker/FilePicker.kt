@@ -32,6 +32,10 @@ actual object FilePicker {
             click()
         }
     }
+
+    actual suspend fun createFile(name: String): PlatformFile? {
+        throw UnsupportedOperationException("")
+    }
 }
 
 actual class PlatformFile(

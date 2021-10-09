@@ -5,6 +5,8 @@ expect object FilePicker {
         allowedExtensions: List<String> = emptyList(),
         allowMultiple: Boolean = false,
     ): List<PlatformFile>
+
+    suspend fun createFile(name: String): PlatformFile?
 }
 
 expect class PlatformFile {

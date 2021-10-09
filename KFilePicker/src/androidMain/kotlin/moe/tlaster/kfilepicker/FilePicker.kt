@@ -20,11 +20,13 @@ import kotlin.coroutines.suspendCoroutine
 actual object FilePicker {
     private lateinit var multipleFilePickerLauncher: MultipleFilePickerLauncher
     private lateinit var singleFilePickerLauncher: SingleFilePickerLauncher
+    private lateinit var createFilePickerLauncher: CreateFilePickerLauncher
     private lateinit var contentResolver: ContentResolver
 
     fun init(registry: ActivityResultRegistry, owner: LifecycleOwner, contentResolver: ContentResolver) {
         multipleFilePickerLauncher = MultipleFilePickerLauncher(registry, owner)
         singleFilePickerLauncher = SingleFilePickerLauncher(registry, owner)
+        createFilePickerLauncher = CreateFilePickerLauncher(registry, owner)
         this.contentResolver = contentResolver
     }
 
@@ -52,6 +54,12 @@ actual object FilePicker {
             mimes.add(mime)
         }
         return mimes
+    }
+
+    actual suspend fun createFile(name: String): PlatformFile? {
+        return createFilePickerLauncher.launch(name)?.let {
+            PlatformFile(it, contentResolver)
+        }
     }
 }
 
@@ -94,6 +102,27 @@ class SingleFilePickerLauncher(
 
     suspend fun launch(type: String): Uri? {
         picker.launch(type)
+        return channel.receive()
+    }
+}
+
+class CreateFilePickerLauncher(
+    registry: ActivityResultRegistry,
+    owner: LifecycleOwner,
+) {
+    private val channel = Channel<Uri?>()
+    private val picker = registry.register(
+        UUID.randomUUID().toString(),
+        owner,
+        ActivityResultContracts.CreateDocument()
+    ) {
+        GlobalScope.launch {
+            channel.send(it)
+        }
+    }
+
+    suspend fun launch(name: String): Uri? {
+        picker.launch(name)
         return channel.receive()
     }
 }

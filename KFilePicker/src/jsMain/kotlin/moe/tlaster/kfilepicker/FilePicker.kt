@@ -5,7 +5,9 @@ import org.khronos.webgl.ArrayBuffer
 import org.khronos.webgl.Int8Array
 import org.w3c.dom.HTMLInputElement
 import org.w3c.dom.asList
+import org.w3c.dom.url.URL
 import org.w3c.files.File
+import org.w3c.files.FileReader
 import org.w3c.files.FileReaderSync
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -36,16 +38,24 @@ actual class PlatformFile(
     private val file: File,
 ) {
     actual val path: String
-        get() = file.name
+        get() = URL.createObjectURL(file)
     actual val size: Long
-        get() = readAllBytes().size.toLong()
+        get() = file.size.toLong()
 
-    actual fun readAllBytes(): ByteArray {
-        return FileReaderSync().readAsArrayBuffer(file).toByteArray()
+    actual suspend fun readAllBytesAsync(): ByteArray = suspendCoroutine { continuation ->
+        val reader = FileReader().apply {
+            onload = {
+                continuation.resume(result.unsafeCast<ArrayBuffer>().toByteArray())
+            }
+        }
+        reader.readAsArrayBuffer(file)
     }
 
-    actual fun writeAllBytes(bytes: ByteArray) {
+    actual suspend fun writeAllBytesAsync(bytes: ByteArray) {
     }
+
+    actual val name: String
+        get() = file.name
 }
 
 private fun ArrayBuffer.toByteArray(): ByteArray = Int8Array(this).unsafeCast<ByteArray>()

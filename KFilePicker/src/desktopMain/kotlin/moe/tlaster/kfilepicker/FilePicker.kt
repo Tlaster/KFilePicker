@@ -62,59 +62,17 @@ actual class PlatformFile(
     actual val size: Long
         get() = file.length()
 
-    actual fun readAllBytes(): ByteArray {
+    actual suspend fun readAllBytesAsync(): ByteArray {
         return file.readBytes()
     }
 
-    actual fun writeAllBytes(bytes: ByteArray) {
+    actual suspend fun writeAllBytesAsync(bytes: ByteArray) {
         file.writeBytes(bytes)
     }
 
     actual val path: String
         get() = file.absolutePath
+
+    actual val name: String
+        get() = file.name
 }
-
-
-//class JSystemFileChooser : JFileChooser() {
-//    override fun updateUI() {
-//        var old = UIManager.getLookAndFeel()
-//        try {
-//            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
-//        } catch (ex: Throwable) {
-//            old = null
-//        }
-//        super.updateUI()
-//        if (old != null) {
-//            val filePane = findFilePane(this)
-//            filePane!!.viewType = FilePane.VIEWTYPE_DETAILS
-//            filePane.viewType = FilePane.VIEWTYPE_LIST
-//            val background = UIManager.getColor("Label.background")
-//            setBackground(background)
-//            isOpaque = true
-//            try {
-//                UIManager.setLookAndFeel(old)
-//            } catch (ignored: UnsupportedLookAndFeelException) {
-//            } // shouldn't get here
-//        }
-//    }
-//
-//    companion object {
-//        private fun findFilePane(parent: Container): FilePane? {
-//            for (comp in parent.components) {
-//                if (comp is FilePane) {
-//                    return comp
-//                }
-//                if (comp is Container) {
-//                    val cont: Container = comp as Container
-//                    if (cont.componentCount > 0) {
-//                        val found = findFilePane(cont)
-//                        if (found != null) {
-//                            return found
-//                        }
-//                    }
-//                }
-//            }
-//            return null
-//        }
-//    }
-//}

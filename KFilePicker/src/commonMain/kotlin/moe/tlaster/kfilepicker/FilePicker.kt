@@ -9,7 +9,8 @@ expect object FilePicker {
 
 expect class PlatformFile {
     val path: String
+    val name: String
     val size: Long
-    fun readAllBytes(): ByteArray
-    fun writeAllBytes(bytes: ByteArray)
+    suspend fun readAllBytesAsync(): ByteArray
+    suspend fun writeAllBytesAsync(bytes: ByteArray)
 }

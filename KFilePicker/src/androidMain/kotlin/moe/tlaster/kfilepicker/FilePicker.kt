@@ -13,7 +13,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.*
+import kotlin.coroutines.suspendCoroutine
 
 actual object FilePicker {
     private lateinit var multipleFilePickerLauncher: MultipleFilePickerLauncher
@@ -34,7 +36,7 @@ actual object FilePicker {
             listOfNotNull(singleFilePickerLauncher.launch(mime))
         }.map {
             PlatformFile(
-                path = it.toString(),
+                uri = it,
                 contentResolver = contentResolver,
             )
         }
@@ -97,17 +99,23 @@ class SingleFilePickerLauncher(
 }
 
 actual class PlatformFile(
-    actual val path: String,
+    private val uri: Uri,
     private val contentResolver: ContentResolver,
 ) {
     actual val size: Long
-        get() = contentResolver.openFileDescriptor(Uri.parse(path), "r")?.statSize ?: 0L
+        get() = contentResolver.openFileDescriptor(uri, "r")?.statSize ?: 0L
 
-    actual fun readAllBytes(): ByteArray {
-        return contentResolver.openInputStream(Uri.parse(path))?.readBytes() ?: emptyArray<Byte>().toByteArray()
+    actual suspend fun readAllBytesAsync(): ByteArray {
+        return contentResolver.openInputStream(uri)?.readBytes() ?: emptyArray<Byte>().toByteArray()
     }
 
-    actual fun writeAllBytes(bytes: ByteArray) {
-        contentResolver.openOutputStream(Uri.parse(path))?.write(bytes)
+    actual suspend fun writeAllBytesAsync(bytes: ByteArray) {
+        contentResolver.openOutputStream(uri)?.write(bytes)
     }
+
+    actual val name: String
+        get() = uri.lastPathSegment ?: ""
+
+    actual val path: String
+        get() = uri.path ?: uri.toString()
 }

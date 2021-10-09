@@ -2,6 +2,8 @@ import androidx.compose.runtime.*
 import kotlinx.coroutines.launch
 import moe.tlaster.kfilepicker.FilePicker
 import moe.tlaster.kfilepicker.PlatformFile
+import org.jetbrains.compose.web.css.DisplayStyle
+import org.jetbrains.compose.web.css.display
 import org.jetbrains.compose.web.dom.Button
 import org.jetbrains.compose.web.dom.Div
 import org.jetbrains.compose.web.dom.Text
@@ -32,7 +34,12 @@ fun Body() {
             Text("Click me!")
         }
         files.forEach {
-            Text(it.path)
+            Div {
+                Text(it.path)
+            }
+            Div {
+                Text(it.size.toString())
+            }
         }
     }
 }

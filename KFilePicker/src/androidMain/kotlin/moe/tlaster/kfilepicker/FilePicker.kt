@@ -6,6 +6,7 @@ import android.webkit.MimeTypeMap
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -128,7 +129,7 @@ class CreateFilePickerLauncher(
 }
 
 actual class PlatformFile(
-    private val uri: Uri,
+    val uri: Uri,
     private val contentResolver: ContentResolver,
 ) {
     actual val size: Long
@@ -146,5 +147,5 @@ actual class PlatformFile(
         get() = uri.lastPathSegment ?: ""
 
     actual val path: String
-        get() = uri.path ?: uri.toString()
+        get() = uri.toString()
 }

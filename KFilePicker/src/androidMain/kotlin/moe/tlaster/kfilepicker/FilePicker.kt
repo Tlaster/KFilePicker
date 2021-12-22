@@ -32,7 +32,7 @@ actual object FilePicker {
     }
 
     actual suspend fun pickFiles(allowedExtensions: List<String>, allowMultiple: Boolean): List<PlatformFile> {
-        val mime = getMimeTypes(allowedExtensions).joinToString("|")
+        val mime = getMimeTypes(allowedExtensions)
         return if (allowMultiple) {
             multipleFilePickerLauncher.launch(mime)
         } else {
@@ -54,7 +54,7 @@ actual object FilePicker {
             val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(element) ?: continue
             mimes.add(mime)
         }
-        return mimes
+        return mimes.takeIf { it.isNotEmpty() } ?: listOf("*/*")
     }
 
     actual suspend fun createFile(name: String): PlatformFile? {
@@ -79,9 +79,22 @@ class MultipleFilePickerLauncher(
             channel.send(it)
         }
     }
+    private val multiMimePicker = registry.register(
+        UUID.randomUUID().toString(),
+        owner,
+        ActivityResultContracts.OpenMultipleDocuments()
+    ) {
+        GlobalScope.launch {
+            channel.send(it)
+        }
+    }
 
-    suspend fun launch(type: String): List<Uri> {
-        picker.launch(type)
+    suspend fun launch(type: List<String>): List<Uri> {
+        if (type.size > 1) {
+            multiMimePicker.launch(type.toTypedArray())
+        } else {
+            picker.launch(type.first())
+        }
         return channel.receive()
     }
 }
@@ -101,8 +114,22 @@ class SingleFilePickerLauncher(
         }
     }
 
-    suspend fun launch(type: String): Uri? {
-        picker.launch(type)
+    private val multiMimePicker = registry.register(
+        UUID.randomUUID().toString(),
+        owner,
+        ActivityResultContracts.OpenDocument()
+    ) {
+        GlobalScope.launch {
+            channel.send(it)
+        }
+    }
+
+    suspend fun launch(type: List<String>): Uri? {
+        if (type.size > 1) {
+            multiMimePicker.launch(type.toTypedArray())
+        } else {
+            picker.launch(type.first())
+        }
         return channel.receive()
     }
 }

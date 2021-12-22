@@ -16,7 +16,7 @@ android {
     compileSdkVersion(31)
     defaultConfig {
         applicationId = "moe.tlaster.android"
-        minSdkVersion(31)
+        minSdkVersion(29)
         targetSdkVersion(31)
         versionCode = 1
         versionName = "1.0"

@@ -1,10 +1,15 @@
 package moe.tlaster.common
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.material.Button
 import androidx.compose.material.Slider
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import moe.tlaster.kfilepicker.FilePicker
 import moe.tlaster.kfilepicker.PlatformFile
@@ -16,16 +21,41 @@ fun App() {
     }
     val scope = rememberCoroutineScope()
     Column {
-        Button(onClick = {
+        SampleButton(text = "Launch SingleFilePicker to pick all kinds of files") {
             scope.launch {
                 files = FilePicker.pickFiles()
             }
-        }) {
-            Text("Click me!")
+        }
+        SampleButton(text = "Launch MultipleFilePicker to pick all kinds of files") {
+            scope.launch {
+                files = FilePicker.pickFiles(allowMultiple = true)
+            }
+        }
+        SampleButton(text = "Launch SingleFilePicker to pick videos and images") {
+            scope.launch {
+                files = FilePicker.pickFiles(allowedExtensions = listOf("mp4", "jpg", "png"))
+            }
+        }
+        SampleButton(text = "Launch MultipleFilePicker to pick videos and images") {
+            scope.launch {
+                files = FilePicker.pickFiles(
+                    allowedExtensions = listOf("mp4", "jpg", "png"),
+                    allowMultiple = true
+                )
+            }
         }
         files.forEach {
             Text(it.path)
         }
     }
+}
 
+@Composable
+private fun SampleButton(text: String, onLaunch: () -> Unit) {
+    Button(modifier = Modifier.fillMaxWidth().padding(20.dp),
+        onClick = {
+            onLaunch.invoke()
+        }) {
+        Text(text)
+    }
 }

@@ -14,7 +14,7 @@ kotlin {
     js(IR) {
         browser()
     }
-    jvm("desktop") {
+    jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "11"
         }
@@ -22,6 +22,9 @@ kotlin {
             useJUnitPlatform()
         }
     }
+    macosArm64()
+    macosX64()
+    ios()
     sourceSets {
         val commonMain by getting {
             dependencies {
@@ -34,8 +37,8 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                api("androidx.core:core-ktx:1.6.0")
-                api("androidx.activity:activity-ktx:1.4.0-beta01")
+                api("androidx.core:core-ktx:1.8.0")
+                api("androidx.activity:activity-ktx:1.6.0-beta01")
             }
         }
         val androidTest by getting {
@@ -43,20 +46,34 @@ kotlin {
                 implementation("junit:junit:4.13.2")
             }
         }
-        val desktopMain by getting {
+        val jvmMain by getting {
             dependencies {
             }
         }
-        val desktopTest by getting
+        val jvmTest by getting
+        val macosMain by creating {
+            dependsOn(commonMain)
+        }
+        val macosX64Main by getting {
+            dependsOn(macosMain)
+        }
+        val macosArm64Main by getting {
+            dependsOn(macosMain)
+        }
+    }
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        binaries.all {
+            binaryOptions["memoryModel"] = "experimental"
+        }
     }
 }
 
 android {
-    compileSdkVersion(31)
+    compileSdk = 33
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
-        minSdkVersion(21)
-        targetSdkVersion(31)
+        minSdk = 21
+        targetSdk = 33
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

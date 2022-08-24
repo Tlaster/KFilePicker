@@ -10,7 +10,4 @@ pluginManagement {
 rootProject.name = "KFilePicker"
 
 include(":KFilePicker")
-// include(":sample:android")
-// include(":sample:desktop")
-// include(":sample:common")
-// include(":sample:web")
+include(":app")
